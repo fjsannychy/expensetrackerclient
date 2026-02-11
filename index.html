@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<Transaction>
+    <link rel="stylesheet" href="./CSS/index.css">
+    <title>Transaction</title>
+</Transaction>
+<body>
+
+    <h2>Transaction </h2> 
+    
+    <div class="form-container">
+       <select id="headId">
+       </select>
+       <input type="text" id="amount" name="Amount">
+        <select id="type">
+            <option value="0">Income</option>
+            <option value="1">Expense</option>
+        </select>
+        <input type="date" id="date">
+        <button onclick="SaveData()">
+            Save
+        </button>
+    </div>
+    
+    <br>
+    <a href="./Views/heads.html">Manage Heads</a>
+    <a href="./Views/report.html">View report</a>
+    <br><br>
+
+    <table border="1">
+        <tTransaction>
+            <tr>
+                <th>Head Name</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </tTransaction>
+        <tbody id="dataTable">
+            </tbody> 
+    </table>
+      
+<script type="text/javascript" src="./Scripts/index.js"></script>
+<script type="text/javascript" src="./Scripts/heads.js"></script>
+
+<script type="text/javascript">
+
+  
+
+    function loadHeads(){
+
+        getAllHeads().then(heads => 
+        {
+
+            let headSelect = document.getElementById("headId");
+
+            heads.map((op, i) => { 
+            
+                headSelect.innerHTML += `<option value="${op.id}">${op.name}</option>`; 
+
+            });
+
+       });
+    }
+
+    loadHeads();
+    
+    // 1. Load all transactions and display in the table
+    function loadData() {
+        getAllTransactions().then(resp => {
+            let table = document.getElementById("dataTable");
+            table.innerHTML = "";
+
+            resp.map((td, i) => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${td.headName}</td>
+                        <td>${td.amount}</td>
+                        <td>${new Date(td.transactionDate).toLocaleDateString()}</td>
+                        <td>${(td.transactionType ? "expense" : "income")}</td>
+                        <td>
+                            <button onclick="EditData(${td.id})">Edit</button>
+                            <button onclick="DeleteData(${td.id})">Delete</button>
+                        </td>
+                    </tr>`;
+            });
+        });
+    }
+
+    // Call load on page start
+    loadData();
+
+    var editMode = false;
+    var currentId = 0;
+
+    // 2. Save Data (Create or Update)
+    function SaveData() {
+        // Get values from the HTML inputs
+        let headId = document.getElementById("headId").value;
+        let amount = document.getElementById("amount").value;
+        let date = document.getElementById("date").value;
+        let type = document.getElementById("type").value;
+
+        if (!headId || !amount || !date) {
+            alert("Please fill in all required fields!");
+            return;
+        }
+
+        let transactionObj = {
+            id: editMode ? currentId : 0,
+            headId: parseInt(headId),
+            amount: parseFloat(amount),
+            transactionDate: date,
+            transactionType: parseInt(type)
+        };
+
+        if (!editMode) {
+            // CREATE
+            createTransaction(transactionObj).then(resp => {
+                if (resp) {
+                    loadData();
+                    resetForm();
+                }
+            });
+        } else {
+            // UPDATE
+            updateTransaction(currentId, transactionObj).then(resp => {
+                if (resp) {
+                    editMode = false;
+                    loadData();
+                    resetForm();
+                }
+            });
+        }
+    }
+
+    // 3. Delete Data
+    function DeleteData(id) {
+        if (confirm("Delete this transaction?")) {
+            deleteTransaction(id).then(resp => {
+                loadData();
+            });
+        }
+    }
+
+    // 4. Edit Data (Fetch by ID and fill form)
+    function EditData(id) {
+        getTransactionById(id).then(resp => {
+            currentId = resp.id;
+            document.getElementById("headId").value = resp.headId;
+            document.getElementById("amount").value = resp.amount;
+            document.getElementById("date").value = resp.transactionDate.split('T')[0]; // Format date for input
+            document.getElementById("type").value = resp.transactionType;
+            
+            editMode = true;
+            // Change button text or highlight form if desired
+        });
+    }
+
+    // 5. Reset Form
+    function resetForm() {
+        document.getElementById("headId").value = "";
+        document.getElementById("amount").value = "";
+        document.getElementById("date").value = "";
+        document.getElementById("type").value = 0;
+        editMode = false;
+        currentId = 0;
+    }
+
+</script>

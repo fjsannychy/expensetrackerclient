@@ -1,0 +1,34 @@
+/* 1. Make the page look clean */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f4f4f4;
+    padding: 20px;
+}
+
+/* 2. Style the table */
+table {
+    width: 300px;
+    margin: 20px auto;    /* Centers the table */
+    border-collapse: collapse; 
+    background-color: white;
+}
+
+/* 3. Style the table cells */
+th, td {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+/* 4. Make the headers look different */
+th {
+    background-color: #dddddd;
+}
+
+/* 5. Style the button */
+button {
+    background-color: green;
+    color: white;
+    padding: 5px 15px;
+    cursor: pointer;
+}
